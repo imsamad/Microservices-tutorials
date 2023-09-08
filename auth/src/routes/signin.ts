@@ -1,8 +1,7 @@
 import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
-import { validateRequest } from '../middlewares/validate-request';
+import { validateRequest, BadRequestError } from '@xyz-common/common';
 import { User } from '../models/user';
-import { BadRequestError } from '../errors/bad-request-error';
 import { Password } from '../services/password';
 import jwt from 'jsonwebtoken';
 
@@ -25,12 +24,13 @@ router.post(
       if (!user || !pwdMatch) {
          throw new BadRequestError('Invalid credentials');
       }
+
       const userJwt = jwt.sign(
          {
             id: user._id,
             email: user.email,
          },
-         'xyz'
+         process.env.JWT_KEY!
       );
 
       req.session = { jwt: userJwt };

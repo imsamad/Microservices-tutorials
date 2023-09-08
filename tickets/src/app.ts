@@ -1,16 +1,15 @@
-require('dotenv').config({});
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import 'express-async-errors';
 
-import { currentUserRouter } from './routes/current-user';
-import { signinRouter } from './routes/signin';
-import { signoutRouter } from './routes/signout';
-import { signupRouter } from './routes/signup';
-import { errorHandler, NotFoundError } from '@xyz-common/common';
+import { currentUser, errorHandler, NotFoundError } from '@xyz-common/common';
 
 import cookieSession from 'cookie-session';
+import { createTicketRouter } from './routes/createTicket';
+import { showTicketRouter } from './routes/show';
+import { indexTicketRouter } from './routes';
+import { updateTicketRouter } from './routes/update';
 
 const app = express();
 
@@ -24,10 +23,6 @@ app.use(cors(corsOption));
 app.use(morgan('dev'));
 app.use(express.json());
 app.set('trust proxy', true);
-app.use((req, res, next) => {
-   console.log('req.session ', req.headers);
-   next();
-});
 
 app.use(
    cookieSession({
@@ -36,10 +31,13 @@ app.use(
    })
 );
 
-app.use(currentUserRouter);
-app.use(signinRouter);
-app.use(signoutRouter);
-app.use(signupRouter);
+app.use(currentUser);
+
+app.use(createTicketRouter);
+
+app.use(showTicketRouter);
+app.use(indexTicketRouter);
+app.use(updateTicketRouter);
 
 app.all('*', async (req, res) => {
    throw new NotFoundError();
